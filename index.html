@@ -39,6 +39,10 @@
       font-size: 16px;
       font-weight: 700;
     }
+    header span {
+      font-size: 12px;
+      opacity: 0.9;
+    }
     .chat-area {
       flex: 1;
       padding: 12px 14px;
@@ -63,6 +67,17 @@
       line-height: 1.4;
       max-width: 85%;
       white-space: pre-line;
+    }
+    .link-list {
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .link-list a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .link-list a:hover {
+      text-decoration: underline;
     }
     .btn-area {
       border-top: 1px solid #e5e7eb;
@@ -90,6 +105,9 @@
     .chip-btn.main {
       font-weight: 600;
     }
+    .chip-btn:hover {
+      background: #f3f4f6;
+    }
   </style>
 </head>
 <body>
@@ -109,41 +127,132 @@
 
 <script>
   /* ===============================
-     URL이 들어가는 MENU_DATA 영역
+     메뉴 & URL 설정
      =============================== */
   const MENU_DATA = {
 
+    // 1. 학원 이용 가이드
     "학원 이용 가이드": [
-      { label: "학원 공지사항", desc: "최근 학원 공지 및 안내사항", url: "LINK_HERE/notice" },
-      { label: "설명회 안내/예약", desc: "설명회 일정 및 신청", url: "LINK_HERE/orientation" },
-      { label: "자주 묻는 질문(FAQ)", desc: "등록·수강·환불 등 Q&A", url: "LINK_HERE/faq" },
-      { label: "찾아오시는 길", desc: "학원 위치 안내", url: "LINK_HERE/map" }
+      {
+        label: "학원 공지사항",
+        desc: "최근 학원 공지 및 안내사항",
+        url: "https://russeldc.megastudy.net/russel/info/notice/notice.asp"
+      },
+      {
+        label: "설명회 예약/알림",
+        desc: "설명회 일정 확인 및 알림 신청",
+        url: "https://russeldc.megastudy.net/russel/entinfo/entry_pt/enter_pt_list.asp"
+      },
+      {
+        label: "자주하는 질문",
+        desc: "등록, 수강, 환불 등 FAQ",
+        url: "https://russeldc.megastudy.net/russel/info/qna/faq.asp"
+      },
+      {
+        label: "1:1 온라인 상담",
+        desc: "온라인 학습·진학 상담 신청",
+        url: "https://russeldc.megastudy.net/russel/info/qna/qna.asp"
+      },
+      {
+        label: "단과 마감강좌 대기 신청",
+        desc: "마감된 단과 강좌 대기 신청",
+        url: "https://russeldc.megastudy.net/russel/info/waiting/list.asp?ClsCode=1"
+      },
+      {
+        label: "모의고사 구매",
+        desc: "러셀 모의고사 구매",
+        url: "https://russeldc.megastudy.net/russel/online_mock/index.asp"
+      },
+      {
+        label: "마이페이지(재등록/교재/좌석/급식)",
+        desc: "재등록, 교재, 좌석예약, 급식 신청",
+        url: "https://russeldc.megastudy.net/russel/entinfo/online/service.asp"
+      }
     ],
 
-    "모집요강 · 등록안내": [
-      { label: "N수(재수) 모집요강", desc: "재수·반수생 모집 안내", url: "LINK_HERE/nsinfo" },
-      { label: "재학생 모집요강", desc: "고1·2·3 모집 요강", url: "LINK_HERE/hsinfo" },
-      { label: "등록/선발 일정", desc: "등록 일정 및 우선선발", url: "LINK_HERE/schedule" },
-      { label: "수강료·환불 규정", desc: "결제 및 환불 안내", url: "LINK_HERE/refund" }
+    // 2. 모집요강 및 단과 시간표
+    "모집요강 및 단과 시간표": [
+      {
+        label: "N수 우선선발반 모집요강",
+        desc: "2026 N수 우선선발반 모집 안내",
+        url: "https://russeldc.megastudy.net/intro/2026/first/index.asp"
+      },
+      {
+        label: "재학생 윈터스쿨 모집요강",
+        desc: "재학생 윈터스쿨 모집 안내",
+        url: "https://russeldc.megastudy.net/intro/2025/winter/index.asp"
+      },
+      {
+        label: "고3/N수 단과 시간표",
+        desc: "고3·N수 단과 강좌 시간표",
+        url: "https://russeldc.megastudy.net/russel/campus_common/russel_danka/russel_danka_new.asp?idx=2198"
+      },
+      {
+        label: "고2/1 단과 시간표",
+        desc: "고2·고1 단과 강좌 시간표",
+        url: "https://russeldc.megastudy.net/russel/campus_common/russel_danka/russel_danka_new.asp?idx=2185"
+      },
+      {
+        label: "시즌/특강 시간표",
+        desc: "시즌·특강(파이널 등) 시간표",
+        url: "https://russeldc.megastudy.net/russel/campus_common/russel_danka/russel_danka_new.asp?idx=2184"
+      },
+      {
+        label: "논술 특강 시간표",
+        desc: "논술 특강 시간표",
+        url: "https://russeldc.megastudy.net/russel/campus_common/russel_danka/russel_danka_new.asp?idx=2105"
+      }
     ],
 
-    "단과 시간표 안내": [
-      { label: "고3·N수 단과 시간표", desc: "최신 고3·N수 시간표", url: "LINK_HERE/g3n" },
-      { label: "고2 단과 시간표", desc: "고2 시간표", url: "LINK_HERE/g2" },
-      { label: "고1 단과 시간표", desc: "고1 시간표", url: "LINK_HERE/g1" },
-      { label: "시즌/특강 시간표", desc: "파이널·윈터 특강 안내", url: "LINK_HERE/special" }
-    ],
-
+    // 3. 바른공부 자습전용관
     "바른공부 자습전용관": [
-      { label: "자습전용관 안내", desc: "운영·이용 안내", url: "LINK_HERE/self" },
-      { label: "모의고사 일정/콘텐츠", desc: "모의고사 안내", url: "LINK_HERE/mock" },
-      { label: "재학생 특별 혜택", desc: "각종 학습 지원 혜택", url: "LINK_HERE/benefit" },
-      { label: "주간 식단표", desc: "이번주 식단표", url: "LINK_HERE/meal" }
+      {
+        label: "자습전용관 안내",
+        desc: "바른공부 자습전용관 운영·이용 안내",
+        url: "https://russeldc.megastudy.net/russel/info/study_hall/study_hall.asp"
+      },
+      {
+        label: "재학생 특별 혜택",
+        desc: "재학생 대상 특별 혜택 안내",
+        url: "https://russeldc.megastudy.net/russel/event/2020/megapass/megapass.asp"
+      },
+      {
+        label: "주간 식단표",
+        desc: "이번 주 학원 식단표 확인",
+        url: "https://russeldc.megastudy.net/russel/campus_common/campus/weekly_food.asp"
+      }
     ],
 
-    /* ===============================
-       🔥 출강 선생님 안내 (실제 URL 적용됨)
-       =============================== */
+    // 4. 모의고사 일정/콘텐츠
+    "모의고사 일정/콘텐츠": [
+      {
+        label: "2026년 모의고사 일정",
+        desc: "2026년 러셀 모의고사 일정 안내",
+        url: "https://russeldc.megastudy.net/russel/entinfo/test_schedule.asp?year=2026"
+      },
+      {
+        label: "OMEGA 모의고사",
+        desc: "OMEGA 모의고사 소개",
+        url: "https://russeldc.megastudy.net/event/omega_intro/index.asp"
+      },
+      {
+        label: "전국 대단위 실전 모의고사",
+        desc: "전국 대단위 실전 모의고사 안내",
+        url: "https://russeldc.megastudy.net/event/2025/jdsm/index.asp"
+      },
+      {
+        label: "메대프 모의고사",
+        desc: "메대프 모의고사 소개",
+        url: "https://russeldc.megastudy.net/intro/2022/premium/index.asp"
+      },
+      {
+        label: "ALPHA 모의고사",
+        desc: "ALPHA 모의고사 소개",
+        url: "https://russeldc.megastudy.net/event/2025/alpha/index.asp"
+      }
+    ],
+
+    // 5. 출강 선생님 안내
     "출강 선생님 안내": [
       {
         label: "국어",
@@ -182,9 +291,23 @@
       }
     ],
 
-    "상담사 연결": [
-      { label: "전화 상담", desc: "전화 상담 연결", url: "tel:010-0000-0000" },
-      { label: "온라인 상담 신청", desc: "온라인 상담", url: "LINK_HERE/contact" }
+    // 6. 학원 이용 안내
+    "학원 이용 안내": [
+      {
+        label: "학원 시설",
+        desc: "강의실, 자습실 등 시설 안내",
+        url: "https://russeldc.megastudy.net/russel/info/campus_facility.asp"
+      },
+      {
+        label: "오시는 길",
+        desc: "러셀 대치학원 위치 안내",
+        url: "https://russeldc.megastudy.net/russel/info/location.asp"
+      },
+      {
+        label: "문자 알림 신청",
+        desc: "학원 문자 알림 신청/관리",
+        url: "https://russeldc.megastudy.net/russel/entinfo/entry_pt/enter_pt_list.asp"
+      }
     ]
   };
 
@@ -198,7 +321,7 @@
 
   const MAIN_MENUS = Object.keys(MENU_DATA);
 
-  function addBotMessage(text, linksHtml="") {
+  function addBotMessage(text, linksHtml = "") {
     const wrap = document.createElement("div");
     wrap.className = "msg msg-bot";
 
@@ -236,7 +359,7 @@
     const items = MENU_DATA[menuName];
     if (!items) return;
 
-    addBotMessage(`『${menuName}』 관련 메뉴입니다.\n원하시는 항목을 선택해 주세요.`);
+    addBotMessage(`『${menuName}』 관련 주요 메뉴입니다.\n원하시는 항목을 선택해 주세요.`);
 
     btnTitle.textContent = `${menuName} 세부 메뉴`;
     btnList.innerHTML = "";
@@ -267,7 +390,7 @@
   function init() {
     const firstMsg =
       "안녕하세요. 메가스터디 러셀 대치학원 챗봇입니다.\n\n" +
-      "학원 이용, 모집요강, 단과 시간표, 자습전용관, 선생님 정보까지\n" +
+      "학원 이용, 모집요강, 단과 시간표, 자습전용관, 모의고사, 출강 선생님 정보까지\n" +
       "아래 버튼을 눌러 궁금한 내용을 선택해 주세요.";
     addBotMessage(firstMsg);
     renderMainButtons();
@@ -277,4 +400,3 @@
 </script>
 </body>
 </html>
-
