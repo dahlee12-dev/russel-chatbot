@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>대치 러셀 챗봇 베타 (버튼 버전)</title>
+  <title>메가스터디 러셀 챗봇</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,10 +39,6 @@
       font-size: 16px;
       font-weight: 700;
     }
-    header span {
-      font-size: 12px;
-      opacity: 0.9;
-    }
     .chat-area {
       flex: 1;
       padding: 12px 14px;
@@ -68,7 +64,6 @@
       max-width: 85%;
       white-space: pre-line;
     }
-
     .btn-area {
       border-top: 1px solid #e5e7eb;
       padding: 10px 10px 14px;
@@ -92,27 +87,8 @@
       background: #ffffff;
       cursor: pointer;
     }
-    .chip-btn:hover {
-      background: #f3f4f6;
-    }
     .chip-btn.main {
       font-weight: 600;
-    }
-    .top-info {
-      font-size: 11px;
-      color: #6b7280;
-      margin-bottom: 4px;
-    }
-    .link-list {
-      margin-top: 6px;
-      font-size: 12px;
-    }
-    .link-list a {
-      color: #2563eb;
-      text-decoration: none;
-    }
-    .link-list a:hover {
-      text-decoration: underline;
     }
   </style>
 </head>
@@ -123,9 +99,7 @@
     <span>대치학원 안내</span>
   </header>
 
-  <div class="chat-area" id="chat">
-    <!-- 초기 안내 메시지 -->
-  </div>
+  <div class="chat-area" id="chat"></div>
 
   <div class="btn-area">
     <div class="btn-title" id="btn-title">원하시는 메뉴를 선택해 주세요.</div>
@@ -134,167 +108,111 @@
 </div>
 
 <script>
-  // =========================
-  // 1. 메뉴/링크 데이터
-  // =========================
-  // 실제 URL은 LINK_HERE 부분을 러셀 홈페이지 주소로 교체해서 사용하면 됩니다.
+  /* ===============================
+     URL이 들어가는 MENU_DATA 영역
+     =============================== */
   const MENU_DATA = {
+
     "학원 이용 가이드": [
-      {
-        label: "학원 공지사항",
-        desc: "최근 학원 공지 및 안내사항",
-        url: "LINK_HERE/notice"
-      },
-      {
-        label: "설명회 안내/예약",
-        desc: "설명회 일정 및 예약",
-        url: "LINK_HERE/orientation"
-      },
-      {
-        label: "자주 묻는 질문(FAQ)",
-        desc: "등록, 수강, 환불 등 FAQ",
-        url: "LINK_HERE/faq"
-      },
-      {
-        label: "찾아오시는 길",
-        desc: "주소 및 위치 안내",
-        url: "LINK_HERE/map"
-      }
+      { label: "학원 공지사항", desc: "최근 학원 공지 및 안내사항", url: "LINK_HERE/notice" },
+      { label: "설명회 안내/예약", desc: "설명회 일정 및 신청", url: "LINK_HERE/orientation" },
+      { label: "자주 묻는 질문(FAQ)", desc: "등록·수강·환불 등 Q&A", url: "LINK_HERE/faq" },
+      { label: "찾아오시는 길", desc: "학원 위치 안내", url: "LINK_HERE/map" }
     ],
+
     "모집요강 · 등록안내": [
-      {
-        label: "N수(재수) 모집요강",
-        desc: "재수·반수생 모집요강",
-        url: "LINK_HERE/n-info"
-      },
-      {
-        label: "재학생(고1·2·3) 모집요강",
-        desc: "재학생 모집요강",
-        url: "LINK_HERE/student-info"
-      },
-      {
-        label: "등록 일정/선발 일정",
-        desc: "우선선발·등록 일정",
-        url: "LINK_HERE/schedule"
-      },
-      {
-        label: "수강료/환불 규정",
-        desc: "결제 및 환불 안내",
-        url: "LINK_HERE/refund"
-      }
+      { label: "N수(재수) 모집요강", desc: "재수·반수생 모집 안내", url: "LINK_HERE/nsinfo" },
+      { label: "재학생 모집요강", desc: "고1·2·3 모집 요강", url: "LINK_HERE/hsinfo" },
+      { label: "등록/선발 일정", desc: "등록 일정 및 우선선발", url: "LINK_HERE/schedule" },
+      { label: "수강료·환불 규정", desc: "결제 및 환불 안내", url: "LINK_HERE/refund" }
     ],
+
     "단과 시간표 안내": [
-      {
-        label: "고3·N수 단과 시간표",
-        desc: "수능/재수 단과반 시간표",
-        url: "LINK_HERE/timetable-g3n"
-      },
-      {
-        label: "고2 단과 시간표",
-        desc: "고2 단과반 시간표",
-        url: "LINK_HERE/timetable-g2"
-      },
-      {
-        label: "고1 단과 시간표",
-        desc: "고1 단과반 시간표",
-        url: "LINK_HERE/timetable-g1"
-      },
-      {
-        label: "시즌/특강 시간표",
-        desc: "윈터/파이널 특강 등",
-        url: "LINK_HERE/timetable-special"
-      }
+      { label: "고3·N수 단과 시간표", desc: "최신 고3·N수 시간표", url: "LINK_HERE/g3n" },
+      { label: "고2 단과 시간표", desc: "고2 시간표", url: "LINK_HERE/g2" },
+      { label: "고1 단과 시간표", desc: "고1 시간표", url: "LINK_HERE/g1" },
+      { label: "시즌/특강 시간표", desc: "파이널·윈터 특강 안내", url: "LINK_HERE/special" }
     ],
+
     "바른공부 자습전용관": [
-      {
-        label: "자습전용관 안내",
-        desc: "운영 시간·이용 안내",
-        url: "LINK_HERE/selfstudy"
-      },
-      {
-        label: "모의고사 일정/콘텐츠",
-        desc: "실력완성 모의고사 등",
-        url: "LINK_HERE/mock"
-      },
-      {
-        label: "재학생 특별 혜택",
-        desc: "장학 및 지원 혜택",
-        url: "LINK_HERE/benefit"
-      },
-      {
-        label: "주간 식단표",
-        desc: "이번 주 식단 안내",
-        url: "LINK_HERE/meal"
-      }
+      { label: "자습전용관 안내", desc: "운영·이용 안내", url: "LINK_HERE/self" },
+      { label: "모의고사 일정/콘텐츠", desc: "모의고사 안내", url: "LINK_HERE/mock" },
+      { label: "재학생 특별 혜택", desc: "각종 학습 지원 혜택", url: "LINK_HERE/benefit" },
+      { label: "주간 식단표", desc: "이번주 식단표", url: "LINK_HERE/meal" }
     ],
+
+    /* ===============================
+       🔥 출강 선생님 안내 (실제 URL 적용됨)
+       =============================== */
     "출강 선생님 안내": [
       {
-        label: "국어 선생님",
+        label: "국어",
         desc: "국어 출강 선생님 소개",
-        url: "LINK_HERE/teacher-kor"
+        url: "https://russeldc.megastudy.net/russel/teacher/teacher.asp?te_les=CD0023"
       },
       {
-        label: "수학 선생님",
+        label: "수학",
         desc: "수학 출강 선생님 소개",
-        url: "LINK_HERE/teacher-math"
+        url: "https://russeldc.megastudy.net/russel/teacher/teacher.asp?te_les=CD0024"
       },
       {
-        label: "영어 선생님",
+        label: "영어",
         desc: "영어 출강 선생님 소개",
-        url: "LINK_HERE/teacher-eng"
+        url: "https://russeldc.megastudy.net/russel/teacher/teacher.asp?te_les=CD0025"
       },
       {
-        label: "사회/과학/논술",
-        desc: "그 외 과목 선생님",
-        url: "LINK_HERE/teacher-etc"
-      }
-    ],
-    "성적 기반 수업 추천": [
+        label: "한국사",
+        desc: "한국사 출강 선생님 소개",
+        url: "https://russeldc.megastudy.net/russel/teacher/teacher.asp?te_les=CD0049"
+      },
       {
-        label: "추천 방법 안내",
-        desc: "성적·목표에 따라 반 추천",
-        url: "LINK_HERE/consult" // 실 상담 페이지가 있으면 연결
+        label: "사회",
+        desc: "사회 출강 선생님 소개",
+        url: "https://russeldc.megastudy.net/russel/teacher/teacher.asp?te_les=CD0026"
+      },
+      {
+        label: "과학",
+        desc: "과학 출강 선생님 소개",
+        url: "https://russeldc.megastudy.net/russel/teacher/teacher.asp?te_les=CD0027"
+      },
+      {
+        label: "논술",
+        desc: "논술 출강 선생님 소개",
+        url: "https://russeldc.megastudy.net/russel/teacher/teacher.asp?te_les=CD0028"
       }
     ],
+
     "상담사 연결": [
-      {
-        label: "전화 상담 안내",
-        desc: "전화번호·운영시간",
-        url: "tel:02-000-0000"
-      },
-      {
-        label: "온라인 상담 신청",
-        desc: "상담 신청 폼",
-        url: "LINK_HERE/online-counsel"
-      }
+      { label: "전화 상담", desc: "전화 상담 연결", url: "tel:010-0000-0000" },
+      { label: "온라인 상담 신청", desc: "온라인 상담", url: "LINK_HERE/contact" }
     ]
   };
 
-  // 메인 메뉴 버튼 목록
+  /* ===============================
+     공통 JS 로직
+     =============================== */
+
+  const chat = document.getElementById("chat");
+  const btnList = document.getElementById("btn-list");
+  const btnTitle = document.getElementById("btn-title");
+
   const MAIN_MENUS = Object.keys(MENU_DATA);
 
-  const chat = document.getElementById('chat');
-  const btnList = document.getElementById('btn-list');
-  const btnTitle = document.getElementById('btn-title');
+  function addBotMessage(text, linksHtml="") {
+    const wrap = document.createElement("div");
+    wrap.className = "msg msg-bot";
 
-  // =========================
-  // 2. 공통 함수
-  // =========================
-  function addBotMessage(text, linksHtml = "") {
-    const wrap = document.createElement('div');
-    wrap.className = 'msg msg-bot';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
     bubble.textContent = text;
 
     wrap.appendChild(bubble);
 
     if (linksHtml) {
-      const box = document.createElement('div');
-      box.className = 'link-list';
+      const box = document.createElement("div");
+      box.className = "link-list";
       box.innerHTML = linksHtml;
-      bubble.appendChild(document.createElement('br'));
+      bubble.appendChild(document.createElement("br"));
       bubble.appendChild(box);
     }
 
@@ -306,8 +224,8 @@
     btnTitle.textContent = "원하시는 메뉴를 선택해 주세요.";
     btnList.innerHTML = "";
     MAIN_MENUS.forEach(menu => {
-      const btn = document.createElement('button');
-      btn.className = 'chip-btn main';
+      const btn = document.createElement("button");
+      btn.className = "chip-btn main";
       btn.textContent = menu;
       btn.onclick = () => openMenu(menu);
       btnList.appendChild(btn);
@@ -318,31 +236,26 @@
     const items = MENU_DATA[menuName];
     if (!items) return;
 
-    // 채팅창에 안내 메시지 + 링크 목록
-    let msg = `『${menuName}』 관련 주요 메뉴입니다.\n원하시는 항목을 아래 버튼에서 선택해 주세요.`;
-    addBotMessage(msg);
+    addBotMessage(`『${menuName}』 관련 메뉴입니다.\n원하시는 항목을 선택해 주세요.`);
 
-    // 버튼 영역 변경
     btnTitle.textContent = `${menuName} 세부 메뉴`;
     btnList.innerHTML = "";
 
-    // 세부 버튼
     items.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className = 'chip-btn';
+      const btn = document.createElement("button");
+      btn.className = "chip-btn";
       btn.textContent = item.label;
       btn.title = item.desc;
       btn.onclick = () => {
         const html = `<a href="${item.url}" target="_blank">${item.label} 바로가기</a>`;
         addBotMessage(`${item.label} 페이지로 이동합니다.\n(${item.desc})`, html);
-        window.open(item.url, '_blank');
+        window.open(item.url, "_blank");
       };
       btnList.appendChild(btn);
     });
 
-    // 처음으로 버튼
-    const homeBtn = document.createElement('button');
-    homeBtn.className = 'chip-btn';
+    const homeBtn = document.createElement("button");
+    homeBtn.className = "chip-btn";
     homeBtn.textContent = "◀ 처음으로";
     homeBtn.onclick = () => {
       addBotMessage("처음 메뉴로 돌아갑니다.");
@@ -351,9 +264,6 @@
     btnList.appendChild(homeBtn);
   }
 
-  // =========================
-  // 3. 초기 세팅
-  // =========================
   function init() {
     const firstMsg =
       "안녕하세요. 메가스터디 러셀 대치학원 챗봇입니다.\n\n" +
@@ -367,3 +277,4 @@
 </script>
 </body>
 </html>
+
