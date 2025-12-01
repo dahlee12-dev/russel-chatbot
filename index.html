@@ -55,12 +55,6 @@
       align-items: flex-start;
       gap: 6px;
     }
-    .msg-bot .bubble {
-      background: #e5e7eb;
-      color: #111827;
-      border-radius: 14px;
-      border-bottom-left-radius: 4px;
-    }
     .bubble {
       font-size: 13px;
       padding: 9px 11px;
@@ -68,6 +62,23 @@
       max-width: 85%;
       white-space: pre-line;
     }
+    .msg-bot .bubble {
+      background: #e5e7eb;
+      color: #111827;
+      border-radius: 14px;
+      border-bottom-left-radius: 4px;
+    }
+    /* 사용자 말풍선 스타일 추가 */
+    .msg-user {
+      justify-content: flex-end;
+    }
+    .msg-user .bubble {
+      background: #0072ff;
+      color: #ffffff;
+      border-radius: 14px;
+      border-bottom-right-radius: 4px;
+    }
+
     .link-list {
       margin-top: 6px;
       font-size: 12px;
@@ -79,6 +90,36 @@
     .link-list a:hover {
       text-decoration: underline;
     }
+
+    /* 입력 영역 */
+    .input-area {
+      border-top: 1px solid #e5e7eb;
+      padding: 8px 10px;
+      background: #ffffff;
+      display: flex;
+      gap: 8px;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      outline: none;
+    }
+    .input-area button {
+      padding: 8px 14px;
+      font-size: 13px;
+      border-radius: 999px;
+      border: none;
+      background: #0072ff;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .input-area button:hover {
+      background: #005ddb;
+    }
+
     .btn-area {
       border-top: 1px solid #e5e7eb;
       padding: 10px 10px 14px;
@@ -118,6 +159,16 @@
   </header>
 
   <div class="chat-area" id="chat"></div>
+
+  <!-- ⬇⬇ 텍스트 입력창 추가 ⬇⬇ -->
+  <div class="input-area">
+    <input
+      id="user-input"
+      type="text"
+      placeholder="예) 모의고사 일정 알려줘 / 수학 2~3등급 추천"
+    />
+    <button id="send-btn">전송</button>
+  </div>
 
   <div class="btn-area">
     <div class="btn-title" id="btn-title">원하시는 메뉴를 선택해 주세요.</div>
@@ -337,6 +388,8 @@
   const chat = document.getElementById("chat");
   const btnList = document.getElementById("btn-list");
   const btnTitle = document.getElementById("btn-title");
+  const userInput = document.getElementById("user-input");
+  const sendBtn = document.getElementById("send-btn");
 
   const MAIN_MENUS = [...Object.keys(MENU_DATA), RECOMMEND_MENU_KEY];
 
@@ -348,7 +401,6 @@
     bubble.className = "bubble";
     bubble.textContent = text;
 
-    // ☆ 여기서 꼭 bubble을 append 해야 함!
     wrap.appendChild(bubble);
 
     if (linksHtml) {
@@ -359,6 +411,20 @@
       bubble.appendChild(box);
     }
 
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  // 사용자 말풍선 추가
+  function addUserMessage(text) {
+    const wrap = document.createElement("div");
+    wrap.className = "msg msg-user";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+
+    wrap.appendChild(bubble);
     chat.appendChild(wrap);
     chat.scrollTop = chat.scrollHeight;
   }
@@ -514,7 +580,104 @@
   }
 
   /* ===============================
-     4) 초기 실행
+     4) 자연어 입력 처리 로직
+     =============================== */
+
+  function handleUserInput(rawText) {
+    const text = rawText.trim();
+    if (!text) return;
+
+    // 1) 사용자 메시지 말풍선으로 표시
+    addUserMessage(text);
+
+    // 2) 간단한 전처리
+    const t = text.replace(/\s+/g, "");
+    const lower = text.toLowerCase();
+
+    // 3) 성적별 추천 직접 요청인 경우
+    // 예: "수학 2~3등급 추천", "영어 1~2등급 알려줘"
+    let foundSubject = SUBJECT_LIST.find(sub => text.includes(sub));
+    let foundLevel = LEVEL_LIST.find(lv => text.includes(lv));
+    if (foundSubject && foundLevel) {
+      showRecommendResult(foundSubject, foundLevel);
+      return;
+    }
+    // "수학 2등급, 3등급 사이" 같이 애매하게 쓰면 그냥 추천 흐름만 열어줌
+    if (foundSubject && (text.includes("등급") || text.includes("추천"))) {
+      addBotMessage(
+        `성적별 ${foundSubject} 수업 추천을 도와드릴게요.\n아래에서 등급대를 선택해 주세요.`
+      );
+      renderRecommendLevelButtons(foundSubject);
+      return;
+    }
+
+    // "성적별 추천", "수업 추천" 등 키워드
+    if (text.includes("성적") || text.includes("추천")) {
+      openRecommendFlow();
+      return;
+    }
+
+    // 4) 메인 메뉴 키워드 매칭
+    // 메뉴 이름 그대로 쳤을 때
+    for (const menu of MAIN_MENUS) {
+      const key = menu.replace(/\s/g, "");
+      if (t.includes(key)) {
+        openMenuOrRecommend(menu);
+        return;
+      }
+    }
+
+    // 5) 대표 키워드 매핑
+    if (text.includes("모의고사") || text.includes("모의고사일정")) {
+      openMenu("모의고사 일정/콘텐츠");
+      return;
+    }
+    if (text.includes("시간표") || text.includes("단과")) {
+      openMenu("모집요강 및 단과 시간표");
+      return;
+    }
+    if (text.includes("자습") || text.includes("바른공부") || text.includes("자습실")) {
+      openMenu("바른공부 자습전용관");
+      return;
+    }
+    if (text.includes("선생님") || text.includes("출강") || text.includes("강사")) {
+      openMenu("출강 선생님 안내");
+      return;
+    }
+    if (text.includes("시설") || text.includes("오시는길") || text.includes("위치") || text.includes("주소")) {
+      openMenu("학원 이용 안내");
+      return;
+    }
+    if (text.includes("공지") || text.includes("공지사항") || text.includes("안내")) {
+      openMenu("학원 이용 가이드");
+      return;
+    }
+
+    // 6) 아무 것도 매칭 안 될 때
+    addBotMessage(
+      "아직은 정해진 키워드 위주로만 안내가 가능해요.\n" +
+      "다음과 같은 키워드로 다시 질문해 보세요.\n\n" +
+      "• 모의고사 일정\n" +
+      "• 단과 시간표 / 시간표\n" +
+      "• 자습실 / 바른공부\n" +
+      "• 출강 선생님 / 선생님\n" +
+      "• 학원 이용 안내\n" +
+      "• 성적별 수업 추천 (예: 수학 2~3등급 추천)\n\n" +
+      "또는 아래 버튼을 눌러 메뉴를 선택하셔도 됩니다."
+    );
+    renderMainButtons();
+  }
+
+  function openMenuOrRecommend(menu) {
+    if (menu === RECOMMEND_MENU_KEY) {
+      openRecommendFlow();
+    } else {
+      openMenu(menu);
+    }
+  }
+
+  /* ===============================
+     5) 초기 실행 & 이벤트 바인딩
      =============================== */
 
   function init() {
@@ -522,10 +685,29 @@
       "안녕하세요. 메가스터디 러셀 대치학원 챗봇입니다.\n\n" +
       "학원 이용, 모집요강, 단과 시간표, 자습전용관, 모의고사, 출강 선생님 안내와\n" +
       "성적별 수업 추천 기능을 제공합니다.\n" +
-      "아래 버튼을 눌러 궁금한 내용을 선택해 주세요.";
+      "아래 버튼을 누르거나, 상단 입력창에\n" +
+      "예) '모의고사 일정 알려줘', '수학 2~3등급 추천'\n" +
+      "처럼 입력해 보세요.";
     addBotMessage(firstMsg);
     renderMainButtons();
   }
+
+  // 전송 버튼 클릭
+  sendBtn.addEventListener("click", () => {
+    const value = userInput.value;
+    userInput.value = "";
+    handleUserInput(value);
+  });
+
+  // 엔터키 입력
+  userInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const value = userInput.value;
+      userInput.value = "";
+      handleUserInput(value);
+    }
+  });
 
   init();
 </script>
