@@ -61,15 +61,6 @@
       border-radius: 14px;
       border-bottom-left-radius: 4px;
     }
-    .msg-user {
-      justify-content: flex-end;
-    }
-    .msg-user .bubble {
-      background: #0072ff;
-      color: #ffffff;
-      border-radius: 14px;
-      border-bottom-right-radius: 4px;
-    }
     .bubble {
       font-size: 13px;
       padding: 9px 11px;
@@ -88,37 +79,6 @@
     .link-list a:hover {
       text-decoration: underline;
     }
-
-    /* ===== 텍스트 입력 영역 ===== */
-    .input-area {
-      border-top: 1px solid #e5e7eb;
-      padding: 8px 10px;
-      background: #ffffff;
-      display: flex;
-      gap: 8px;
-    }
-    .input-area input {
-      flex: 1;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      padding: 8px 12px;
-      font-size: 13px;
-      outline: none;
-    }
-    .input-area button {
-      border-radius: 999px;
-      border: none;
-      padding: 8px 14px;
-      font-size: 13px;
-      background: #0072ff;
-      color: #ffffff;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .input-area button:hover {
-      opacity: 0.9;
-    }
-
     .btn-area {
       border-top: 1px solid #e5e7eb;
       padding: 10px 10px 14px;
@@ -159,17 +119,6 @@
 
   <div class="chat-area" id="chat"></div>
 
-  <!-- ① 텍스트 입력 영역 추가 -->
-  <div class="input-area">
-    <input
-      id="user-input"
-      type="text"
-      placeholder="예) 고3 단과 시간표 알려줘 / 성적별 추천"
-    />
-    <button id="send-btn">보내기</button>
-  </div>
-
-  <!-- ② 버튼 영역 (기존) -->
   <div class="btn-area">
     <div class="btn-title" id="btn-title">원하시는 메뉴를 선택해 주세요.</div>
     <div class="btn-list" id="btn-list"></div>
@@ -388,8 +337,6 @@
   const chat = document.getElementById("chat");
   const btnList = document.getElementById("btn-list");
   const btnTitle = document.getElementById("btn-title");
-  const userInput = document.getElementById("user-input");
-  const sendBtn = document.getElementById("send-btn");
 
   const MAIN_MENUS = [...Object.keys(MENU_DATA), RECOMMEND_MENU_KEY];
 
@@ -401,6 +348,7 @@
     bubble.className = "bubble";
     bubble.textContent = text;
 
+    // ☆ 여기서 꼭 bubble을 append 해야 함!
     wrap.appendChild(bubble);
 
     if (linksHtml) {
@@ -411,19 +359,6 @@
       bubble.appendChild(box);
     }
 
-    chat.appendChild(wrap);
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  function addUserMessage(text) {
-    const wrap = document.createElement("div");
-    wrap.className = "msg msg-user";
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.textContent = text;
-
-    wrap.appendChild(bubble);
     chat.appendChild(wrap);
     chat.scrollTop = chat.scrollHeight;
   }
@@ -579,89 +514,7 @@
   }
 
   /* ===============================
-     4) 텍스트 입력 → 키워드 매칭 로직
-     =============================== */
-
-  function handleTextQuery(rawText) {
-    const text = rawText.trim();
-    if (!text) return;
-
-    const t = text.toLowerCase(); // 한글은 그대로지만 일단 소문자 처리
-
-    // 1) 성적별 추천
-    if (text.includes("성적") && text.includes("추천")) {
-      addBotMessage("성적별 수업 추천으로 이동할게요.\n과목을 선택해 주세요.");
-      openRecommendFlow();
-      return;
-    }
-
-    // 2) 단과/시간표
-    if (text.includes("시간표") || text.includes("단과")) {
-      addBotMessage("단과 시간표 관련 메뉴를 열어 드릴게요.");
-      openMenu("모집요강 및 단과 시간표");
-      return;
-    }
-
-    // 3) 자습전용관
-    if (text.includes("자습") || text.includes("바른공부")) {
-      addBotMessage("자습전용관 관련 메뉴를 열어 드릴게요.");
-      openMenu("바른공부 자습전용관");
-      return;
-    }
-
-    // 4) 모의고사
-    if (text.includes("모의고사") || text.includes("모고")) {
-      addBotMessage("모의고사 관련 메뉴를 열어 드릴게요.");
-      openMenu("모의고사 일정/콘텐츠");
-      return;
-    }
-
-    // 5) 출강 선생님
-    if (text.includes("선생님") || text.includes("강사") || text.includes("출강")) {
-      addBotMessage("출강 선생님 안내 메뉴를 열어 드릴게요.");
-      openMenu("출강 선생님 안내");
-      return;
-    }
-
-    // 6) 학원 이용 안내 (위치/시설 등)
-    if (
-      text.includes("가는길") ||
-      text.includes("오시는 길") ||
-      text.includes("위치") ||
-      text.includes("시설") ||
-      text.includes("좌석")
-    ) {
-      addBotMessage("학원 이용 안내 메뉴를 열어 드릴게요.");
-      openMenu("학원 이용 안내");
-      return;
-    }
-
-    // 7) 공지/설명회/등록 관련
-    if (text.includes("공지") || text.includes("faq") || text.includes("질문")) {
-      addBotMessage("학원 이용 가이드 메뉴를 열어 드릴게요.");
-      openMenu("학원 이용 가이드");
-      return;
-    }
-
-    // 매칭 실패 시
-    addBotMessage(
-      "아직은 몇 가지 키워드로만 이해할 수 있어요.\n" +
-      "예) '고3 단과 시간표', '자습전용관', '모의고사 일정', '성적별 수업 추천'\n" +
-      "아래 메뉴 버튼에서 직접 선택해 주세요."
-    );
-    renderMainButtons();
-  }
-
-  function handleSend() {
-    const text = userInput.value;
-    if (!text.trim()) return;
-    addUserMessage(text);
-    userInput.value = "";
-    handleTextQuery(text);
-  }
-
-  /* ===============================
-     5) 초기 실행 & 이벤트 연결
+     4) 초기 실행
      =============================== */
 
   function init() {
@@ -669,19 +522,10 @@
       "안녕하세요. 메가스터디 러셀 대치학원 챗봇입니다.\n\n" +
       "학원 이용, 모집요강, 단과 시간표, 자습전용관, 모의고사, 출강 선생님 안내와\n" +
       "성적별 수업 추천 기능을 제공합니다.\n" +
-      "아래 버튼을 누르시거나, 직접 질문을 입력해 보세요.\n\n" +
-      "예) '고3 단과 시간표 알려줘', '성적별 수업 추천', '자습전용관 안내'";
+      "아래 버튼을 눌러 궁금한 내용을 선택해 주세요.";
     addBotMessage(firstMsg);
     renderMainButtons();
   }
-
-  sendBtn.addEventListener("click", handleSend);
-  userInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSend();
-    }
-  });
 
   init();
 </script>
